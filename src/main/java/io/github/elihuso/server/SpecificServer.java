@@ -50,7 +50,7 @@ public class SpecificServer implements HttpHandler {
     private void responseBoom(HttpExchange httpExchange) throws IOException {
         if (!httpExchange.getRequestHeaders().containsKey("Accept-Encoding")) {
             httpExchange.getResponseHeaders().add("Content-Encoding", "gzip");
-            Boom boom = new Boom();
+            Boom boom = new Boom(Main.loader);
             httpExchange.sendResponseHeaders(200, boom.getGzipLength());
             OutputStream outputStream = httpExchange.getResponseBody();
             outputStream.write(boom.getBoomGzipByte());
@@ -58,7 +58,7 @@ public class SpecificServer implements HttpHandler {
         }
         else if ((!httpExchange.getRequestHeaders().getFirst("Accept-Encoding").contains("zstd")) && (!httpExchange.getRequestHeaders().getFirst("Accept-Encoding").contains("*"))) {
             httpExchange.getResponseHeaders().add("Content-Encoding", "gzip");
-            Boom boom = new Boom();
+            Boom boom = new Boom(Main.loader);
             httpExchange.sendResponseHeaders(200, boom.getGzipLength());
             OutputStream outputStream = httpExchange.getResponseBody();
             outputStream.write(boom.getBoomGzipByte());
@@ -66,7 +66,7 @@ public class SpecificServer implements HttpHandler {
         }
         else {
             httpExchange.getResponseHeaders().add("Content-Encoding", "zstd");
-            Boom boom = new Boom();
+            Boom boom = new Boom(Main.loader);
             httpExchange.sendResponseHeaders(200, boom.getZstdLength());
             OutputStream outputStream = httpExchange.getResponseBody();
             outputStream.write(boom.getBoomZstdByte());

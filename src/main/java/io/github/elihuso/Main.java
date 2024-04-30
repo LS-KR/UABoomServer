@@ -37,8 +37,10 @@ public class Main {
     public static List<String> serverFileList = new ArrayList<>();
     public static HttpServer server;
     public static boolean running = true;
+    public static ClassLoader loader;
 
     public static void main(String[] args) {
+        loader = Thread.currentThread().getContextClassLoader();
         new Main().doMain(args);
     }
 
