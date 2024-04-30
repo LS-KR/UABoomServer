@@ -32,22 +32,25 @@ public class FileServer implements HttpHandler {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-        Headers headers = httpExchange.getRequestHeaders();
-        String userAgent = headers.getFirst("User-Agent");
-
         httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization, authentication");
         httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
         httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
 
+        Headers headers = httpExchange.getRequestHeaders();
+        Logger.Log(LoggerLevel.NOTIFICATION, headers.getFirst("User-Agent"));
+
+        if ((headers.isEmpty()) || (!headers.containsKey("User-Agent"))) {
+            Logger.Log(LoggerLevel.WARNING, "No User Agent Found");
+            responseBoom(httpExchange);
+            return;
+        }
+
+        String userAgent = headers.getFirst("User-Agent");
+
         if (!userAgent.contains(Main.agent)) {
-            httpExchange.getResponseHeaders().add("Content-Encoding", "zstd");
-            Boom boom = new Boom();
-            httpExchange.sendResponseHeaders(200, boom.getLength());
-            OutputStream outputStream = httpExchange.getResponseBody();
-            outputStream.write(boom.getBoomByte());
-            outputStream.close();
-            Logger.Log(LoggerLevel.POSITIVE, "Boom!");
+            Logger.Log(LoggerLevel.NOTIFICATION, "User-Agent not matched");
+            responseBoom(httpExchange);
             return;
         }
 
@@ -112,5 +115,33 @@ public class FileServer implements HttpHandler {
         outputStream.write(response);
         outputStream.close();
         Logger.Log(LoggerLevel.POSITIVE, "Response " + file.getPath());
+    }
+
+    private void responseBoom(HttpExchange httpExchange) throws IOException {
+        if (!httpExchange.getRequestHeaders().containsKey("Accept-Encoding")) {
+            httpExchange.getResponseHeaders().add("Content-Encoding", "gzip");
+            Boom boom = new Boom();
+            httpExchange.sendResponseHeaders(200, boom.getGzipLength());
+            OutputStream outputStream = httpExchange.getResponseBody();
+            outputStream.write(boom.getBoomGzipByte());
+            outputStream.close();
+        }
+        else if ((!httpExchange.getRequestHeaders().getFirst("Accept-Encoding").contains("zstd")) && (!httpExchange.getRequestHeaders().getFirst("Accept-Encoding").contains("*"))) {
+            httpExchange.getResponseHeaders().add("Content-Encoding", "gzip");
+            Boom boom = new Boom();
+            httpExchange.sendResponseHeaders(200, boom.getGzipLength());
+            OutputStream outputStream = httpExchange.getResponseBody();
+            outputStream.write(boom.getBoomGzipByte());
+            outputStream.close();
+        }
+        else {
+            httpExchange.getResponseHeaders().add("Content-Encoding", "zstd");
+            Boom boom = new Boom();
+            httpExchange.sendResponseHeaders(200, boom.getZstdLength());
+            OutputStream outputStream = httpExchange.getResponseBody();
+            outputStream.write(boom.getBoomZstdByte());
+            outputStream.close();
+        }
+        Logger.Log(LoggerLevel.NEGATIVE, "Boom!");
     }
 }

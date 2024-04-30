@@ -7,19 +7,30 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class Boom {
-    private final byte[] boomByte;
+    private final byte[] boomZstdByte;
+    private final byte[] boomGzipByte;
 
     public Boom() throws IOException {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream is = loader.getResourceAsStream("zeroboom.zstd");
-        boomByte = Streaming.ByteInputStream(is);
+        boomZstdByte = Streaming.ByteInputStream(is);
+        is = loader.getResourceAsStream("zeroboom.gz");
+        boomGzipByte = Streaming.ByteInputStream(is);
     }
 
-    public byte[] getBoomByte() {
-        return boomByte;
+    public byte[] getBoomZstdByte() {
+        return boomZstdByte;
     }
 
-    public long getLength() {
-        return MathEx.getByteLength(boomByte);
+    public long getZstdLength() {
+        return MathEx.getByteLength(boomZstdByte);
+    }
+
+    public byte[] getBoomGzipByte() {
+        return boomGzipByte;
+    }
+
+    public long getGzipLength() {
+        return MathEx.getByteLength(boomGzipByte);
     }
 }
