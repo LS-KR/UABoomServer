@@ -73,11 +73,12 @@ public class Main {
         if (mode.equalsIgnoreCase("server")) {
             for (var v : serverFileList) {
                 server.createContext(v.replaceFirst("server/", "/"), new FileServer(v));
-                Logger.Log(LoggerLevel.POSITIVE, v.replaceFirst("server/", "/") + "→" + v);
+                Logger.Log(LoggerLevel.POSITIVE, v.replaceFirst("server/", "/") + " -> " + v);
             }
         }
         server.getExecutor();
         server.start();
+        Logger.Log(LoggerLevel.NOTIFICATION, "Server Started.");
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println();
             Logger.Log(LoggerLevel.WARNING, "Closing Server...");
@@ -122,6 +123,7 @@ public class Main {
         else if (mode.equalsIgnoreCase("server")) {
             if (Files.isDirectory(Path.of("./server"))) {
                 File serverPath = new File("./server");
+                serverFileList.add(new File(".").toURI().relativize(new File(serverPath.getAbsolutePath()).toURI()).getPath());
                 addFiles(serverPath.listFiles());
             }
             else {
@@ -137,7 +139,6 @@ public class Main {
         for (var v : files) {
             serverFileList.add(new File(".").toURI().relativize(new File(v.getAbsolutePath()).toURI()).getPath());
             if (v.isDirectory()) {
-                serverFileList.add(new File(".").toURI().relativize(new File(v.getAbsolutePath()).toURI()).getPath() + "/");
                 if (v.listFiles() == null) continue;
                 if (v.listFiles().length == 0) continue;
                 addFiles(v.listFiles());
