@@ -1,6 +1,7 @@
 package io.github.elihuso;
 
 import com.sun.net.httpserver.HttpServer;
+import io.github.elihuso.data.JavaResources;
 import io.github.elihuso.logic.Streaming;
 import io.github.elihuso.module.Logger;
 import io.github.elihuso.server.FileServer;
@@ -13,7 +14,6 @@ import org.kohsuke.args4j.Option;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InvalidObjectException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
@@ -95,13 +95,10 @@ public class Main {
         File config = new File(configPath);
         if (!config.exists()) {
             config.createNewFile();
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            InputStream is = loader.getResourceAsStream("config.ini");
-            Files.write(config.toPath(), Streaming.ByteInputStream(is));
-            is = loader.getResourceAsStream("text.file");
+            Files.write(config.toPath(), Streaming.ByteInputStream(JavaResources.getResource("config.ini")));
             Path textPath = Path.of("./text.file");
             Files.createFile(textPath);
-            Files.write(textPath, Streaming.ByteInputStream(is));
+            Files.write(textPath, Streaming.ByteInputStream(JavaResources.getResource("text.file")));
         }
         Ini ini = new Ini(config);
         if (ini.get("DEFAULT").containsKey("agent")) {

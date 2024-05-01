@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import io.github.elihuso.Main;
 import io.github.elihuso.data.Boom;
+import io.github.elihuso.data.JavaResources;
 import io.github.elihuso.logic.FileMIME;
 import io.github.elihuso.logic.MathEx;
 import io.github.elihuso.logic.Streaming;
@@ -94,9 +95,7 @@ public class FileServer implements HttpHandler {
     }
 
     private void response404(HttpExchange httpExchange) throws IOException {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream is = loader.getResourceAsStream("404.html");
-        String response = Streaming.ReadInputStream(is);
+        String response = Streaming.ReadInputStream(JavaResources.getResource("404.html"));
         FileMIME fileMIME = new FileMIME();
         httpExchange.getResponseHeaders().add("Content-Type", fileMIME.getType(FilenameUtils.getExtension("404.html")));
         httpExchange.sendResponseHeaders(404, response.length());
