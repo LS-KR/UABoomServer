@@ -3,6 +3,7 @@ package io.github.elihuso.logic;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import io.github.elihuso.components.MIME;
+import io.github.elihuso.data.JavaResources;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -10,13 +11,10 @@ import java.util.List;
 
 public class FileMIME {
 
-    private final String rawMime;
     private final List<MIME> mimes = new ArrayList<>();
 
     public FileMIME() {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream is = loader.getResourceAsStream("mime.json");
-        this.rawMime = Streaming.ReadInputStream(is);
+        String rawMime = Streaming.ReadInputStream(JavaResources.getResource("mime.json"));
         JsonArray jsonArray = new Gson().fromJson(rawMime, JsonArray.class);
         for (int i = 0; i < jsonArray.size(); ++i) {
             String name = jsonArray.get(i).getAsJsonObject().get("name").getAsString();
