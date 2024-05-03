@@ -37,6 +37,7 @@ public class Main {
     public static List<String> serverFileList = new ArrayList<>();
     public static HttpServer server;
     public static boolean running = true;
+    public static String serverPathString = "./server";
     public static ClassLoader loader;
 
     public static void main(String[] args) {
@@ -74,8 +75,8 @@ public class Main {
         }
         if (mode.equalsIgnoreCase("server")) {
             for (var v : serverFileList) {
-                server.createContext(v.replaceFirst("server/", "/"), new FileServer(v));
-                Logger.Log(LoggerLevel.POSITIVE, v.replaceFirst("server/", "/") + " -> " + v);
+                server.createContext(v.replaceFirst(serverPathString, "/"), new FileServer(v));
+                Logger.Log(LoggerLevel.POSITIVE, v.replaceFirst(serverPathString, "/") + " -> " + v);
             }
         }
         server.getExecutor();
@@ -120,13 +121,19 @@ public class Main {
             }
         }
         else if (mode.equalsIgnoreCase("server")) {
-            if (Files.isDirectory(Path.of("./server"))) {
-                File serverPath = new File("./server");
+            if (ini.get("SERVER").containsKey("path")) {
+                serverPathString = ini.get("SERVER", "path");
+                Logger.Log(LoggerLevel.NOTIFICATION, "Server Path: " + serverPathString);
+                if (Path.of(serverPathString).toAbsolutePath() == Path.of(".").toAbsolutePath())
+                    Logger.Log(LoggerLevel.WARNING, "Server Path set as . may cause unexpected errors");
+            }
+            if (Files.isDirectory(Path.of(serverPathString))) {
+                File serverPath = new File(serverPathString);
                 serverFileList.add(new File(".").toURI().relativize(new File(serverPath.getAbsolutePath()).toURI()).getPath());
                 addFiles(serverPath.listFiles());
             }
             else {
-                throw new InvalidObjectException("directory ./server not found");
+                throw new InvalidObjectException("directory " + serverPathString + " not found");
             }
         }
         else {
